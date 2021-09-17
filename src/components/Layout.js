@@ -118,6 +118,7 @@ function Layout({ children }) {
                         key={item.path}
                         onClick={() => {
                             history.push(item.path);
+                            handleDrawerToggle();
                         }}
                         className={
                             location.pathname === item.path

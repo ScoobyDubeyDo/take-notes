@@ -116,10 +116,16 @@ function Layout({ children }) {
                     <ListItem
                         button
                         key={item.path}
-                        onClick={() => {
-                            history.push(item.path);
-                            handleDrawerToggle();
-                        }}
+                        onClick={
+                            mobileOpen === true
+                                ? () => {
+                                    history.push(item.path);
+                                    handleDrawerToggle();
+                                    }
+                                : () => {
+                                    history.push(item.path);
+                                    }
+                        }
                         className={
                             location.pathname === item.path
                                 ? classes.active

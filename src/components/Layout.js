@@ -14,12 +14,13 @@ import {
 } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core";
 import React, { useState } from "react";
-import { useHistory, useLocation } from "react-router";
+import { useHistory, useLocation } from "react-router-dom";
 import {
     AddCircleOutlineRounded,
     SubjectRounded,
     MenuRounded,
 } from "@material-ui/icons";
+import { useAuth } from "../context/AuthContext";
 
 const drawerWidth = 240;
 
@@ -81,6 +82,7 @@ function Layout({ children }) {
     const date = new Date();
     const classes = useStyles();
     const theme = useTheme();
+    const { logout } = useAuth();
 
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -119,12 +121,12 @@ function Layout({ children }) {
                         onClick={
                             mobileOpen === true
                                 ? () => {
-                                    history.push(item.path);
-                                    handleDrawerToggle();
-                                    }
+                                      history.push(item.path);
+                                      handleDrawerToggle();
+                                  }
                                 : () => {
-                                    history.push(item.path);
-                                    }
+                                      history.push(item.path);
+                                  }
                         }
                         className={
                             location.pathname === item.path
@@ -140,57 +142,71 @@ function Layout({ children }) {
         </div>
     );
 
-    return (
-        <div className={classes.root}>
-            <AppBar className={classes.appBar}>
-                <Toolbar>
-                    <IconButton
-                        edge="start"
-                        onClick={handleDrawerToggle}
-                        color="inherit"
-                        className={classes.menuButton}
-                    >
-                        <MenuRounded />
-                    </IconButton>
-                    <Typography className={classes.date} noWrap variant="h6">
-                        Your Notes
-                    </Typography>
-                    <Typography>aman</Typography>
-                    <Avatar
-                        className={classes.avatar}
-                        src={
-                            "https://improveyourdrawings.com/wp-content/uploads/2019/02/Step-12-Shadows.jpg"
-                        }
-                    />
-                </Toolbar>
-            </AppBar>
-            <nav>
-                <Hidden smUp implementation="css">
-                    <Drawer
-                        variant="temporary"
-                        anchor={theme.direction === "rtl" ? "right" : "left"}
-                        open={mobileOpen}
-                        onClose={handleDrawerToggle}
-                        classes={{ paper: classes.drawerPaper }}
-                    >
-                        {drawer}
-                    </Drawer>
-                </Hidden>
-                <Hidden xsDown implementation="css">
-                    <Drawer
-                        classes={{ paper: classes.drawerPaper }}
-                        variant="permanent"
-                    >
-                        {drawer}
-                    </Drawer>
-                </Hidden>
-            </nav>
-            <div className={classes.page}>
-                <div className={classes.toolBar} />
-                {children}
+    if (location.pathname === "/" || location.pathname === "/create") {
+        return (
+            <div className={classes.root}>
+                <AppBar className={classes.appBar}>
+                    <Toolbar>
+                        <IconButton
+                            edge="start"
+                            onClick={handleDrawerToggle}
+                            color="inherit"
+                            className={classes.menuButton}
+                        >
+                            <MenuRounded />
+                        </IconButton>
+                        <Typography
+                            className={classes.date}
+                            noWrap
+                            variant="h6"
+                        >
+                            Your Notes
+                        </Typography>
+                        <Typography>aman</Typography>
+                        <Avatar
+                            onClick={async () => {
+                                await logout();
+                                history.push("/");
+                            }}
+                            className={classes.avatar}
+                            src={
+                                "https://improveyourdrawings.com/wp-content/uploads/2019/02/Step-12-Shadows.jpg"
+                            }
+                        />
+                    </Toolbar>
+                </AppBar>
+                <nav>
+                    <Hidden smUp implementation="css">
+                        <Drawer
+                            variant="temporary"
+                            anchor={
+                                theme.direction === "rtl" ? "right" : "left"
+                            }
+                            open={mobileOpen}
+                            onClose={handleDrawerToggle}
+                            classes={{ paper: classes.drawerPaper }}
+                        >
+                            {drawer}
+                        </Drawer>
+                    </Hidden>
+                    <Hidden xsDown implementation="css">
+                        <Drawer
+                            classes={{ paper: classes.drawerPaper }}
+                            variant="permanent"
+                        >
+                            {drawer}
+                        </Drawer>
+                    </Hidden>
+                </nav>
+                <div className={classes.page}>
+                    <div className={classes.toolBar} />
+                    {children}
+                </div>
             </div>
-        </div>
-    );
+        );
+    } else {
+        return <>{children}</>;
+    }
 }
 
 export default Layout;

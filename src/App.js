@@ -18,7 +18,11 @@ function App() {
                     <Layout>
                         <Switch>
                             <ProtectedRoute exact path="/" component={Notes} />
-                            <ProtectedRoute path="/create" component={Create} />
+                            <ProtectedRoute
+                                exact
+                                path="/create"
+                                component={Create}
+                            />
                             <RestrictedRoute
                                 exact
                                 path="/signup"
@@ -34,7 +38,7 @@ function App() {
                                 path="/forgot-password"
                                 component={ForgotPassword}
                             />
-                            <Route component={NotFound} />
+                            <Route path="*" component={NotFound} />
                         </Switch>
                     </Layout>
                 </CenterContainer>

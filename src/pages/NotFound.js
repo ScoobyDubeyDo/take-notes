@@ -1,6 +1,12 @@
 import React from "react";
-import { Card, CardMedia, CardContent, Typography } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core";
+import {
+    CardHeader,
+    Card,
+    CardMedia,
+    CardContent,
+    Typography,
+} from "@material-ui/core";
+import { makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import PageNotFound from "../images/PageNotFound.png";
 
 const useStyles = makeStyles((theme) => {
@@ -13,11 +19,17 @@ const useStyles = makeStyles((theme) => {
                 maxWidth: 400,
             },
         },
+        heading: {
+            fontWeight: 300,
+            letterSpacing: "-0.00833em",
+        },
     };
 });
 
 function NotFound() {
+    const theme = useTheme();
     const classes = useStyles();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     return (
         <>
             <Card align="center" elevation={3} className={classes.card}>
@@ -28,9 +40,14 @@ function NotFound() {
                     alt="Page Not Found"
                 />
                 <CardContent>
-                    <Typography variant="h2" gutterBottom>
-                        A Dog Ate this Page
-                    </Typography>
+                    <CardHeader
+                        title="A Dog Ate this Page"
+                        titleTypographyProps={{
+                            variant: isSmallScreen ? "h3" : "h2",
+                            component: "h2",
+                            className: classes.heading,
+                        }}
+                    />
                     <Typography variant="body1" align="left">
                         Your dog is cute but honestly a menace. Where are my
                         shoes? Where is my graduation certificate? Where is the

@@ -9,7 +9,7 @@ import {
     Link,
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import { useAuth } from "../context/AuthContext";
 import { Link as routeLink, useHistory } from "react-router-dom";
 
@@ -21,12 +21,18 @@ const useStyles = makeStyles({
         display: "inline-block",
         marginBottom: 12,
     },
+    heading: {
+        fontWeight: 300,
+        letterSpacing: "-0.00833em",
+    },
 });
 
 function Login() {
     const classes = useStyles();
     const emailRef = useRef();
+    const theme = useTheme();
     const passwordRef = useRef();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const { login } = useAuth();
     const [generalError, setGeneralError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -78,8 +84,9 @@ function Login() {
                     <CardHeader
                         title="Log In"
                         titleTypographyProps={{
-                            variant: "h2",
+                            variant: isSmallScreen ? "h3" : "h2",
                             component: "h2",
+                            className: classes.heading,
                         }}
                     />
 

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { auth } from "../firebase";
+import { auth, firebaseAuth, storage } from "../firebase";
 
 const AuthContext = React.createContext();
 
@@ -27,6 +27,18 @@ export function AuthProvider({ children }) {
         return auth.sendPasswordResetEmail(email);
     }
 
+    function getCredential(email, password) {
+        return firebaseAuth.EmailAuthProvider.credential(email, password);
+    }
+
+    function uploadProfilePicture(uid, image) {
+        return storage.ref(`users/${uid}/profile`).put(image);
+    }
+
+    function downloadProfilePicture(uid) {
+        return storage.ref(`users/${uid}/profile`).getDownloadURL();
+    }
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             setCurrentUser(user);
@@ -42,6 +54,9 @@ export function AuthProvider({ children }) {
         signup,
         logout,
         passwordReset,
+        getCredential,
+        uploadProfilePicture,
+        downloadProfilePicture,
     };
 
     return (

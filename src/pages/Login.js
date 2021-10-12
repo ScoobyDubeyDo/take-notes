@@ -69,8 +69,8 @@ function Login() {
                 setLoading(true);
                 await login(emailRef.current.value, passwordRef.current.value);
                 history.push("/");
-            } catch {
-                setGeneralError("Failed to sign in");
+            } catch (err) {
+                setGeneralError(err.message);
             }
 
             setLoading(false);

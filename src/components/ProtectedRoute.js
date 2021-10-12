@@ -9,7 +9,7 @@ function ProtectedRoute({ component: Component, ...rest }) {
         <Route
             {...rest}
             render={(props) => {
-                return currentUser ? (
+                return currentUser !== null && currentUser.emailVerified ? (
                     <Component {...props} />
                 ) : (
                     <Redirect to="/login" />

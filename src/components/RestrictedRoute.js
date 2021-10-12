@@ -9,10 +9,10 @@ function RestrictedRoute({ component: Component, ...rest }) {
         <Route
             {...rest}
             render={(props) => {
-                return currentUser === null ? (
-                    <Component {...props} />
-                ) : (
+                return currentUser !== null && currentUser.emailVerified ? (
                     <Redirect exact to="/" />
+                ) : (
+                    <Component {...props} />
                 );
             }}
         ></Route>

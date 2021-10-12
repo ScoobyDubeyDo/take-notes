@@ -11,7 +11,7 @@ import {
 import { Alert } from "@material-ui/lab";
 import { makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
 import { useAuth } from "../context/AuthContext";
-import { Link as routeLink, useHistory } from "react-router-dom";
+import { Link as routeLink } from "react-router-dom";
 
 const useStyles = makeStyles({
     "mt-12": {
@@ -31,9 +31,9 @@ function Signup() {
     const passwordConfirmRef = useRef();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const { signup } = useAuth();
-    const [generalError, setGeneralError] = useState("");
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertSeverity, setAlertSeverity] = useState("");
     const [loading, setLoading] = useState(false);
-    const history = useHistory();
     const [errors, setErrors] = useState({});
 
     const validate = () => {
@@ -63,17 +63,35 @@ function Signup() {
         return Object.values(temp).every((x) => x === "");
     };
 
+    const handleAlert = (severity, message) => {
+        setAlertMessage(message);
+        setAlertSeverity(severity);
+    };
+
     async function handleSubmit(e) {
         e.preventDefault();
 
+        let actionCodeSettings = {
+            url: "https://knowets.vercel.app/",
+            handleCodeInApp: true,
+        };
+
         if (validate()) {
             try {
-                setGeneralError("");
+                handleAlert("", "");
                 setLoading(true);
-                await signup(emailRef.current.value, passwordRef.current.value);
-                history.push("/");
-            } catch {
-                setGeneralError("Failed to create an account");
+                await signup(emailRef.current.value, passwordRef.current.value)
+                    .then((data) => {
+                        data.user.sendEmailVerification(actionCodeSettings);
+                    })
+                    .then(() => {
+                        handleAlert(
+                            "info",
+                            "Check your inbox for Email Verification"
+                        );
+                    });
+            } catch (err) {
+                handleAlert("error", err.message);
             }
 
             setLoading(false);
@@ -92,10 +110,7 @@ function Signup() {
                             className: classes.heading,
                         }}
                     />
-
-                    {generalError && (
-                        <Alert severity="error">{generalError}</Alert>
-                    )}
+                    <Alert severity={alertSeverity}>{alertMessage}</Alert>
                     <form noValidate autoComplete="off" onSubmit={handleSubmit}>
                         <TextField
                             fullWidth

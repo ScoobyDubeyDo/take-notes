@@ -61,9 +61,10 @@ function ForgotPassword() {
                 setGeneralError("");
                 setLoading(true);
                 await passwordReset(emailRef.current.value);
-                setSuccess("Password reset link send your inbox");
-            } catch {
-                setGeneralError("Failed to reset password");
+                setSuccess("Password reset link send to your inbox");
+            } catch (err) {
+                console.log(err);
+                setGeneralError(err.message);
             }
 
             setLoading(false);

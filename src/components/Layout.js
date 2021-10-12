@@ -11,9 +11,17 @@ import {
     Avatar,
     Toolbar,
     Divider,
+    Button,
+    ButtonGroup,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
 } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core";
-import React, { useState } from "react";
+import { makeStyles, useTheme, useMediaQuery } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import React, { useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import {
     AddCircleOutlineRounded,
@@ -73,6 +81,48 @@ const useStyles = makeStyles((theme) => {
         avatar: {
             marginLeft: theme.spacing(2),
         },
+        dialogAction: {
+            justifyContent: "center",
+            margin: 10,
+        },
+        dialogAvatar: {
+            [theme.breakpoints.up("sm")]: {
+                width: "15vw",
+                height: "15vw",
+            },
+            width: "50vw",
+            height: "50vw",
+            padding: 0,
+        },
+        dialogAvatarInput: {
+            display: "none",
+        },
+        dialogAvatarLabel: {
+            [theme.breakpoints.up("sm")]: {
+                width: "15vw",
+                height: "15vw",
+            },
+            width: "50vw",
+            height: "50vw",
+            display: "block",
+            margin: "0px auto",
+        },
+        avatarUpdating: {
+            animation: "$loading 0.5s infinite",
+        },
+        "@keyframes loading": {
+            "0%": { transform: "translate(1px, 1px) rotate(0deg)" },
+            "10%": { transform: "translate(-1px, -2px) rotate(-1deg)" },
+            "20%": { transform: "translate(-3px, 0px) rotate(1deg)" },
+            "30%": { transform: "translate(3px, 2px) rotate(0deg)" },
+            "40%": { transform: "translate(1px, -1px) rotate(1deg)" },
+            "50%": { transform: "translate(-1px, 2px) rotate(-1deg)" },
+            "60%": { transform: "translate(-3px, 1px) rotate(0deg)" },
+            "70%": { transform: "translate(3px, 1px) rotate(-1deg)" },
+            "80%": { transform: "translate(-1px, -1px) rotate(1deg)" },
+            "90%": { transform: "translate(1px, 2px) rotate(0deg)" },
+            "100%": { transform: "translate(1px, -2px) rotate(-1deg)" },
+        },
     };
 });
 
@@ -82,12 +132,156 @@ function Layout({ children }) {
     const date = new Date();
     const classes = useStyles();
     const theme = useTheme();
-    const { logout } = useAuth();
+    const userEmailRef = useRef();
+    const currentPasswordRef = useRef();
+    const displayNameRef = useRef();
+    const fullScreen = useMediaQuery(theme.breakpoints.up("sm"));
+    const {
+        logout,
+        currentUser,
+        getCredential,
+        downloadProfilePicture,
+        uploadProfilePicture,
+    } = useAuth();
 
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [profileMessage, setProfileMessage] = useState("");
+    const [profileEdit, setProfileEdit] = useState(true);
+    const [alertSeverity, setAlertSeverity] = useState("");
+    const [switchButtons, setSwitchButtons] = useState(true);
+    const [profileErrors, setProfileErrors] = useState({});
+    const [avatarUpdating, setAvatarUpdating] = useState(false);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
+    };
+
+    const handleAlert = (severity, message) => {
+        setProfileMessage(message);
+        setAlertSeverity(severity);
+    };
+
+    const handleDialogOpen = () => {
+        setOpenDialog(true);
+    };
+
+    const handleDialogClose = () => {
+        setOpenDialog(false);
+        if (!validate()) {
+            setProfileErrors({});
+        }
+        setProfileEdit(true);
+        setSwitchButtons(true);
+        handleAlert("", "");
+    };
+
+    const editProfile = () => {
+        setProfileEdit(!profileEdit);
+    };
+
+    const avatarSubmit = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarUpdating(true);
+            handleAlert("info", "Profile picture updating...");
+
+            await uploadProfilePicture(
+                currentUser ? currentUser.uid : null,
+                file
+            )
+                .then(() => {
+                    downloadProfilePicture(currentUser ? currentUser.uid : null)
+                        .then((url) => {
+                            currentUser.updateProfile({
+                                photoURL: url,
+                            });
+                        })
+                        .then(() => {
+                            setAvatarUpdating(false);
+                            handleAlert("success", "Profile picture updated");
+                        });
+                })
+                .catch((err) => handleAlert("error", err.message));
+        }
+    };
+
+    const reAuthenticate = (password) => {
+        const credentials = getCredential(currentUser.email, password);
+        return currentUser.reauthenticateWithCredential(credentials);
+    };
+
+    const validate = () => {
+        let temp = {};
+        temp.displayName = displayNameRef.current.value
+            ? ""
+            : "Provide a display name";
+        temp.newEmail = /^.+@.+.\.+/.test(userEmailRef.current.value)
+            ? ""
+            : "Email is not valid";
+
+        temp.currentPassword = currentPasswordRef.current.value
+            ? /.{8,}$/.test(currentPasswordRef.current.value)
+                ? ""
+                : "Password must has atleast 8 characters"
+            : "Provide a password";
+
+        setProfileErrors({
+            ...temp,
+        });
+
+        return Object.values(temp).every((x) => x === "");
+    };
+
+    const formSubmission = (e) => {
+        e.preventDefault();
+
+        if (validate()) {
+            if (currentPasswordRef.current.value) {
+                reAuthenticate(currentPasswordRef.current.value)
+                    .then(() => {
+                        if (userEmailRef.current.value !== currentUser.email) {
+                            currentUser
+                                .verifyBeforeUpdateEmail(
+                                    userEmailRef.current.value
+                                )
+                                .then(() => {
+                                    handleAlert("info", "Check your inbox");
+                                })
+                                .catch((err) => {
+                                    handleAlert("error", err.message);
+                                });
+                        } else {
+                            handleAlert(
+                                "warning",
+                                "New Email can't be same as current email"
+                            );
+                        }
+                        if (
+                            displayNameRef.current.value !==
+                            currentUser.displayName
+                        ) {
+                            currentUser
+                                .updateProfile({
+                                    displayName: displayNameRef.current.value,
+                                })
+                                .then(() => {
+                                    handleAlert(
+                                        "success",
+                                        "Display Name Updated"
+                                    );
+                                })
+                                .catch((err) => {
+                                    handleAlert("error", err.message);
+                                });
+                        } else {
+                        }
+                    })
+                    .catch((err) => {
+                        handleAlert("error", err.message);
+                    });
+            }
+        }
     };
 
     const menuList = [
@@ -142,6 +336,149 @@ function Layout({ children }) {
         </div>
     );
 
+    const userProfile = (
+        <Dialog
+            open={openDialog}
+            fullWidth
+            maxWidth="sm"
+            fullScreen={!fullScreen}
+            onClose={handleDialogClose}
+        >
+            <DialogTitle disableTypography>
+                <Typography color="secondary" align="center" variant="h2">
+                    Profile
+                </Typography>
+                {profileMessage && (
+                    <Alert severity={alertSeverity}>{profileMessage}</Alert>
+                )}
+            </DialogTitle>
+            <DialogContent>
+                <input
+                    accept="image/*"
+                    className={classes.dialogAvatarInput}
+                    id="avatarImage"
+                    multiple
+                    type="file"
+                    onChange={(e) => avatarSubmit(e)}
+                />
+                <label
+                    className={`${classes.dialogAvatarLabel} ${
+                        avatarUpdating ? classes.avatarUpdating : ""
+                    }`}
+                    htmlFor="avatarImage"
+                >
+                    <IconButton
+                        component="span"
+                        className={classes.dialogAvatar}
+                    >
+                        <Avatar
+                            className={classes.dialogAvatar}
+                            alt={
+                                currentUser &&
+                                (currentUser.displayName
+                                    ? currentUser.displayName
+                                    : "")
+                            }
+                            src={currentUser ? currentUser.photoURL : ""}
+                        />
+                    </IconButton>
+                </label>
+                <form id="profileForm" onSubmit={formSubmission}>
+                    <TextField
+                        variant="outlined"
+                        label="Display Name"
+                        defaultValue={
+                            currentUser &&
+                            (currentUser.displayName
+                                ? currentUser.displayName
+                                : null)
+                        }
+                        inputRef={displayNameRef}
+                        fullWidth
+                        margin="normal"
+                        disabled={profileEdit}
+                        type="text"
+                        {...(profileErrors.displayName && {
+                            error: "true",
+                            helperText: profileErrors.displayName,
+                        })}
+                    />
+                    <TextField
+                        variant="outlined"
+                        label="Email"
+                        defaultValue={currentUser ? currentUser.email : null}
+                        inputRef={userEmailRef}
+                        fullWidth
+                        margin="normal"
+                        disabled={profileEdit}
+                        type="email"
+                        {...(profileErrors.newEmail && {
+                            error: "true",
+                            helperText: profileErrors.newEmail,
+                        })}
+                    />
+                    <Divider />
+                    <TextField
+                        fullWidth
+                        label="Current Password"
+                        variant="filled"
+                        margin="normal"
+                        disabled={profileEdit}
+                        type="password"
+                        inputRef={currentPasswordRef}
+                        required
+                        {...(profileErrors.currentPassword && {
+                            error: "true",
+                            helperText: profileErrors.currentPassword,
+                        })}
+                    />
+                </form>
+            </DialogContent>
+
+            <DialogActions className={classes.dialogAction}>
+                <ButtonGroup
+                    variant="contained"
+                    color="primary"
+                    size={!fullScreen ? "medium" : "large"}
+                >
+                    <Button
+                        color="secondary"
+                        onClick={async () => {
+                            await logout();
+                            history.push("/");
+                        }}
+                    >
+                        Log out
+                    </Button>
+                    {switchButtons ? (
+                        <Button
+                            type="submit"
+                            form="profileForm"
+                            onClick={() => {
+                                editProfile();
+                                setSwitchButtons(!switchButtons);
+                            }}
+                        >
+                            Edit Profile
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => {
+                                if (validate()) {
+                                    editProfile();
+                                    setSwitchButtons(!switchButtons);
+                                }
+                            }}
+                        >
+                            Save Profile
+                        </Button>
+                    )}
+                    <Button onClick={handleDialogClose}>Close</Button>
+                </ButtonGroup>
+            </DialogActions>
+        </Dialog>
+    );
+
     if (location.pathname === "/" || location.pathname === "/create") {
         return (
             <div className={classes.root}>
@@ -162,16 +499,16 @@ function Layout({ children }) {
                         >
                             Your Notes
                         </Typography>
-                        <Typography>aman</Typography>
+                        <Typography noWrap>
+                            {currentUser &&
+                                (currentUser.displayName
+                                    ? currentUser.displayName
+                                    : "")}
+                        </Typography>
                         <Avatar
-                            onClick={async () => {
-                                await logout();
-                                history.push("/");
-                            }}
+                            onClick={handleDialogOpen}
                             className={classes.avatar}
-                            src={
-                                "https://improveyourdrawings.com/wp-content/uploads/2019/02/Step-12-Shadows.jpg"
-                            }
+                            src={currentUser ? currentUser.photoURL : ""}
                         />
                     </Toolbar>
                 </AppBar>
@@ -200,6 +537,7 @@ function Layout({ children }) {
                 </nav>
                 <div className={classes.page}>
                     <div className={classes.toolBar} />
+                    {userProfile}
                     {children}
                 </div>
             </div>

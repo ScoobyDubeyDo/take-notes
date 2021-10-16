@@ -98,7 +98,7 @@ function ForgotPassword() {
                             inputRef={emailRef}
                             variant="filled"
                             {...(errors.email && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.email,
                             })}
                         />

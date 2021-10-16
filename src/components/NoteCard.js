@@ -28,7 +28,7 @@ const useStyles = makeStyles({
     },
 });
 
-function NoteCard({ note, handleDelete }) {
+function NoteCard({ id, note, handleDelete }) {
     const classes = useStyles(note);
 
     return (
@@ -41,7 +41,7 @@ function NoteCard({ note, handleDelete }) {
                         </Avatar>
                     }
                     action={
-                        <IconButton onClick={() => handleDelete(note.id)}>
+                        <IconButton onClick={() => handleDelete(id)}>
                             <DeleteRounded />
                         </IconButton>
                     }

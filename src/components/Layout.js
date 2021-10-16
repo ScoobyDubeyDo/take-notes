@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => {
             },
         },
         toolBar: theme.mixins.toolbar,
-        date: {
+        appTitle: {
             flexGrow: 1,
         },
         avatar: {
@@ -251,11 +251,6 @@ function Layout({ children }) {
                                 .catch((err) => {
                                     handleAlert("error", err.message);
                                 });
-                        } else {
-                            handleAlert(
-                                "warning",
-                                "New Email can't be same as current email"
-                            );
                         }
                         if (
                             displayNameRef.current.value !==
@@ -357,7 +352,6 @@ function Layout({ children }) {
                     accept="image/*"
                     className={classes.dialogAvatarInput}
                     id="avatarImage"
-                    multiple
                     type="file"
                     onChange={(e) => avatarSubmit(e)}
                 />
@@ -399,7 +393,7 @@ function Layout({ children }) {
                         disabled={profileEdit}
                         type="text"
                         {...(profileErrors.displayName && {
-                            error: "true",
+                            error: true,
                             helperText: profileErrors.displayName,
                         })}
                     />
@@ -413,7 +407,7 @@ function Layout({ children }) {
                         disabled={profileEdit}
                         type="email"
                         {...(profileErrors.newEmail && {
-                            error: "true",
+                            error: true,
                             helperText: profileErrors.newEmail,
                         })}
                     />
@@ -428,7 +422,7 @@ function Layout({ children }) {
                         inputRef={currentPasswordRef}
                         required
                         {...(profileErrors.currentPassword && {
-                            error: "true",
+                            error: true,
                             helperText: profileErrors.currentPassword,
                         })}
                     />
@@ -493,17 +487,14 @@ function Layout({ children }) {
                             <MenuRounded />
                         </IconButton>
                         <Typography
-                            className={classes.date}
+                            className={classes.appTitle}
                             noWrap
                             variant="h6"
                         >
-                            Your Notes
-                        </Typography>
-                        <Typography noWrap>
                             {currentUser &&
                                 (currentUser.displayName
-                                    ? currentUser.displayName
-                                    : "")}
+                                    ? `${currentUser.displayName}'s Knowets`
+                                    : "Knowets")}
                         </Typography>
                         <Avatar
                             onClick={handleDialogOpen}

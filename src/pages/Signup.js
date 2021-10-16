@@ -121,7 +121,7 @@ function Signup() {
                             inputRef={emailRef}
                             variant="filled"
                             {...(errors.email && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.email,
                             })}
                         />
@@ -134,7 +134,7 @@ function Signup() {
                             inputRef={passwordRef}
                             variant="filled"
                             {...(errors.password && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.password,
                             })}
                         />
@@ -147,7 +147,7 @@ function Signup() {
                             inputRef={passwordConfirmRef}
                             variant="filled"
                             {...(errors.passwordConfirm && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.passwordConfirm,
                             })}
                         />

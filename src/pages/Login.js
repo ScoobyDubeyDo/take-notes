@@ -103,7 +103,7 @@ function Login() {
                             inputRef={emailRef}
                             variant="filled"
                             {...(errors.email && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.email,
                             })}
                         />
@@ -116,7 +116,7 @@ function Login() {
                             inputRef={passwordRef}
                             variant="filled"
                             {...(errors.password && {
-                                error: "true",
+                                error: true,
                                 helperText: errors.password,
                             })}
                         />

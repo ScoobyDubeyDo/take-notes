@@ -72,7 +72,7 @@ function Signup() {
         e.preventDefault();
 
         let actionCodeSettings = {
-            url: "https://knowets.vercel.app/",
+            url: "https://knowtes.vercel.app/",
             handleCodeInApp: true,
         };
 

@@ -493,8 +493,8 @@ function Layout({ children }) {
                         >
                             {currentUser &&
                                 (currentUser.displayName
-                                    ? `${currentUser.displayName}'s Knowets`
-                                    : "Knowets")}
+                                    ? `${currentUser.displayName}'s knowtes`
+                                    : "knowtes")}
                         </Typography>
                         <Avatar
                             onClick={handleDialogOpen}

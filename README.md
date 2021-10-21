@@ -1,8 +1,8 @@
-![Logo](./assets/logo.png)
-
-<h3 align="center">knowtes</h3>
-
-<a href="https://knowtes.vercel.app/">DEMO</a>
+<p align="center"> 
+    <img src="./assets/logo.svg" />
+    <h3 align="center">knowtes</h3>
+    <p align="center"><a href="https://knowtes.vercel.app/">DEMO</a></p>
+</p>
 
 ## About The Project
 
@@ -19,7 +19,7 @@ A simple and easy-to-use note-taking app with user authentication, designed for 
 ## Screenshots
 
 ![App Screenshot](./assets/screenshots/create.png)
-![App Screenshot](./assets/screenshots/create2.png)
+![App Screenshot](./assets/screenshots/createM.png)
 ![App Screenshot](./assets/screenshots/home.png)
 ![App Screenshot](./assets/screenshots/profile.png)
 
